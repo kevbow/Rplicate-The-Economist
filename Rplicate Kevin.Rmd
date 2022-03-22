@@ -18,6 +18,8 @@ library(lubridate)
 library(dplyr)
 library(padr)
 library(zoo)
+library(grid)
+theme_set(theme_minimal())
 ```
 
 ```{r}
@@ -61,9 +63,8 @@ make dataframe of happiness value average from 2015 - 2019
 df1519 <- df %>%
   filter(date < "2020-01-01") %>%
   mutate(month = month(date),
-         day = day(date),
-         monthday = paste(month, day, sep = "-")) %>% 
-  group_by(monthday) %>% 
+         day = day(date)) %>% 
+  group_by(month, day) %>% 
   summarise(
     happiness = mean(happiness)
   ) %>% 
@@ -92,9 +93,58 @@ colSums(is.na(df20))
 
 make base plot
 ```{r}
-plot <- ggplot(df20, aes(x=date, y=happiness)) +
-  geom_line() + 
-  geom_line(data = df1519, aes(x=date, y=happiness))
-plot
+p1 <- ggplot(df20, aes(x=date, y=happiness)) +
+  geom_line(color = '#076fa1') +  # plot year 2020
+  geom_line(data = df1519, aes(x=date, y=happiness), color = '#31c0d3') + # plot average year 2015-2019
+  ylim(5.6, 6.3)  
+p1
+```
+
+minor and major grid
+```{r}
+p2 <- p1 +
+  theme(text = element_text(family = "Calibri"), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_line(color = "#dbe2e7",
+                                          size = 0.5),
+        panel.grid.major.x = element_blank()) 
+p2
+```
+
+add title, subtitle, and caption
+```{r}
+p3 <- p2 + 
+  labs(x = "", y = "",
+       title = "Annus miserabilis",
+       subtitle = "Average happiness score of English-language tweets
+1=least happy, 9=most happy",
+       caption = 'Source: Hedonometer.org')
+p3
+```
+
+add text
+```{r}
+p4 <- p3 +
+  geom_text(data = df20[4,],
+            label = "Average of\n2015-19",
+            color = '#31c0d3', nudge_y = 0.2,
+            hjust = "left", size = 3,  fontface = "bold") +
+  geom_text(data = df20[4,],
+            aes(label = "2020"),
+            color = '#076fa1', nudge_y = -0.05, nudge_x = 2,
+            hjust = "left", size = 3, fontface = "bold")
+p4
+```
+
+
+```{r}
+grid.rect(x = 1, y = 0.995,
+          hjust = 1, vjust = 0.02,
+          height = 0.01,
+          gp = gpar(fill = "#E5001c", lwd=0))
+grid.rect(x = 0.04, y=  0.98,
+          hjust = 1, vjust = 0.01, height = 0.05,
+          gp = gpar(fill= "#E5001c", lwd = 0))
+
 ```
 
