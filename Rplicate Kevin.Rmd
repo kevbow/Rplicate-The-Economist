@@ -19,6 +19,7 @@ library(dplyr)
 library(padr)
 library(zoo)
 library(grid)
+library(scales)
 theme_set(theme_minimal())
 ```
 
@@ -94,49 +95,127 @@ colSums(is.na(df20))
 make base plot
 ```{r}
 p1 <- ggplot(df20, aes(x=date, y=happiness)) +
-  geom_line(color = '#076fa1') +  # plot year 2020
-  geom_line(data = df1519, aes(x=date, y=happiness), color = '#31c0d3') + # plot average year 2015-2019
-  ylim(5.6, 6.3)  
+  geom_line(data = df1519, aes(x=date, y=happiness), 
+            size = 1, color = '#31c0d3') + # plot average year 2015-2019
+  geom_line(size = 1, color = '#076fa1') +  # plot year 2020
+  ylim(5.6, 6.3) 
 p1
-```
-
-minor and major grid
-```{r}
-p2 <- p1 +
-  theme(text = element_text(family = "Calibri"), 
-        panel.grid.minor = element_blank(),
-        panel.grid.major.y = element_line(color = "#dbe2e7",
-                                          size = 0.5),
-        panel.grid.major.x = element_blank()) 
-p2
 ```
 
 add title, subtitle, and caption
 ```{r}
-p3 <- p2 + 
+p2 <- p1 + 
   labs(x = "", y = "",
        title = "Annus miserabilis",
        subtitle = "Average happiness score of English-language tweets
 1=least happy, 9=most happy",
        caption = 'Source: Hedonometer.org')
-p3
+p2
 ```
 
-add text
+add label text
 ```{r}
-p4 <- p3 +
+p3 <- p2 +
   geom_text(data = df20[4,],
             label = "Average of\n2015-19",
-            color = '#31c0d3', nudge_y = 0.2,
+            color = '#31c0d3', nudge_y = 0.2, 
             hjust = "left", size = 3,  fontface = "bold") +
   geom_text(data = df20[4,],
             aes(label = "2020"),
             color = '#076fa1', nudge_y = -0.05, nudge_x = 2,
             hjust = "left", size = 3, fontface = "bold")
-p4
+p3
 ```
 
+```{r}
+p4 <- p3 +
+  scale_y_continuous(position = "right", limits = c(5.5, 6.3)) +
+  scale_x_date(date_labels = "%b", date_breaks = "1 month")
+p4
+```
+minor and major grid themes
+```{r}
+p5 <- p4 +
+  theme(text = element_text(family = "Calibri"), 
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_line(color = "#dbe2e7",
+                                          size = 0.5),
+        panel.grid.major.x = element_blank(),
+        plot.title = element_text(face = "bold"),
+        plot.caption = element_text(color = "gray", hjust = 0)) 
+p5
+```
+add event text
+```{r}
+p6 <- p5 +
+  geom_text(data = df20[df20$date == '2020-01-03',],
+            label = "Assassination of\nQassem Suleimani",
+            color = '#076fa1', nudge_y = -0.05, nudge_x = -2,
+            hjust = "left", size = 3, lineheight = 0.9) +
+  geom_text(data = df20[df20$date == '2020-02-14',],
+            label = "Valentine's Day",
+            color = '#076fa1', nudge_y = 0.06, nudge_x = 10,
+            hjust = "left", size = 3) +
+  geom_text(data = df20[df20$date == '2020-03-11',],
+            aes(label = "Pandemic declared"),
+            color = '#076fa1', nudge_y = -0.1,
+            hjust = "left", size = 3) + 
+  geom_text(data = df20[df20$date == '2020-05-26',],
+            aes(label = "Protests after death of George Floyd"),
+            color = '#076fa1', nudge_y = -0.24, nudge_x = 2,
+            hjust = "left", size = 3) +
+  geom_text(data = df20[df20$date == '2020-08-25',],
+            aes(label = "Protesters killed\nin Wisconsin, US"),
+            color = '#076fa1', nudge_y = -0.12, nudge_x = 2,
+            hjust = "right", size = 3, lineheight = 0.9) +
+  geom_text(data = df20[df20$date == '2020-10-20',],
+            aes(label = "Protesters\nkilled in\nNigeria"),
+            color = '#076fa1', nudge_y = -0.09, nudge_x = 2,
+            hjust = "right", size = 3, lineheight = 0.9) +
+  geom_text(data = df20[df20$date == '2020-11-06',],
+            aes(label = "US selection\nresult delay"),
+            color = '#076fa1', nudge_y = -0.07, nudge_x = -3,
+            hjust = "left", size = 3, lineheight = 0.9) +
+  geom_text(data = df20[df20$date == '2020-11-26',],
+            aes(label = "Thanksgiving"),
+            color = '#076fa1', nudge_y = 0.076, nudge_x = -10,
+            hjust = "right", size = 3) +
+  geom_text(data = df20[df20$date == '2020-12-25',],
+            aes(label = "Christmas Day"),
+            color = '#076fa1', nudge_y = 0.05, nudge_x = -10,
+            hjust = "right", size = 3)
+p6
+```
 
+add arrow on text
+```{r}
+p7 <- p6 +
+  geom_curve(aes(x = df20[df20$date == '2020-02-14',]$date + 8, 
+                 y = df20[df20$date == '2020-02-14',]$happiness + 0.05,
+                 xend = df20[df20$date == '2020-02-14',]$date, 
+                 yend = df20[df20$date == '2020-02-14',]$happiness + 0.005),
+             data = df20,
+             arrow = arrow(length = unit(0.015, "npc")),
+             curvature = 0.5) +
+  geom_curve(aes(x = df20[df20$date == '2020-11-26',]$date - 8, 
+                 y = df20[df20$date == '2020-11-26',]$happiness + 0.07,
+                 xend = df20[df20$date == '2020-11-27',]$date, 
+                 yend = df20[df20$date == '2020-11-27',]$happiness + 0.005),
+             data = df20,
+             arrow = arrow(length = unit(0.015, "npc")),
+             curvature = -0.5) +
+  geom_curve(aes(x = df20[df20$date == '2020-12-25',]$date - 9, 
+                 y = df20[df20$date == '2020-12-25',]$happiness + 0.05,
+                 xend = df20[df20$date == '2020-12-25',]$date, 
+                 yend = df20[df20$date == '2020-12-25',]$happiness + 0.005),
+             data = df20,
+             arrow = arrow(length = unit(0.015, "npc")),
+             curvature = -0.5)
+  
+p7
+```
+
+  
 ```{r}
 grid.rect(x = 1, y = 0.995,
           hjust = 1, vjust = 0.02,
