@@ -5,3 +5,7 @@ Try to replicate visualization by The Economist, the plot that I choose was from
 The real plot:
 
 ![Image](https://github.com/kevbow/Rplicate-The-Economist/blob/main/assets/economist_real_plot.png)
+
+My own plot:
+
+![Image](https://github.com/kevbow/Rplicate-The-Economist/blob/main/assets/saved_p7.png)
