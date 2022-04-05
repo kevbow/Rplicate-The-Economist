@@ -8,4 +8,4 @@ The real plot:
 
 My own plot:
 
-![Image](https://github.com/kevbow/Rplicate-The-Economist/blob/main/assets/saved_p7.png)
+![Image](https://github.com/kevbow/Rplicate-The-Economist/blob/main/assets/saved_p7_1.png)
